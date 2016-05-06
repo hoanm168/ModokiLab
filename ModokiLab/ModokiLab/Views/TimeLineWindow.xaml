@@ -1,0 +1,99 @@
+﻿<Window x:Class="ModokiLab.Views.TimeLineWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+        xmlns:v="clr-namespace:ModokiLab.Views"
+        xmlns:vm="clr-namespace:ModokiLab.ViewModels"
+        Title="TimeLineWindow" Height="350" Width="525">
+
+    <Window.DataContext>
+        <vm:TimeLineViewModel/>
+    </Window.DataContext>
+
+    <i:Interaction.Triggers>
+
+        <!--Viewに特別な要件が存在しない限りは、トリガーやアクションの自作にこだわらず積極的にコードビハインドを使いましょう -->
+        <!--Viewのコードビハインドは、基本的にView内で完結するロジックとViewModelからのイベントの受信(専用リスナを使用する)に限るとトラブルが少なくなります -->
+        <!--Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています -->
+
+        <!--WindowのContentRenderedイベントのタイミングでViewModelのInitializeメソッドが呼ばれます-->
+        <i:EventTrigger EventName="ContentRendered">
+            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Initialize"/>
+        </i:EventTrigger>
+
+        <l:InteractionMessageTrigger Messenger="{Binding Messenger}" >
+            <l:TransitionInteractionMessageAction/>
+        </l:InteractionMessageTrigger>
+
+        <!--Windowが閉じたタイミングでViewModelのDisposeメソッドが呼ばれます-->
+        <i:EventTrigger EventName="Closed">
+            <l:DataContextDisposeAction/>
+        </i:EventTrigger>
+
+        <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
+
+    </i:Interaction.Triggers>
+
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" >
+            <Image Grid.Column="0" Source="{Binding User.Image}" Height="50" Width="50"/>
+            <DockPanel>
+                <Label Content="{Binding User.Name}" Height="36" MinWidth="80" DockPanel.Dock="Top"/>
+                <DockPanel>
+                    <Label Content="ツイート" DockPanel.Dock="Right"/>
+                    <Label Content="{Binding User.TweetCount}"/>
+                </DockPanel>
+            </DockPanel>
+            <Button Margin="0,2" Content="つぶやく" Command="{Binding TweetCommand}" DockPanel.Dock="Right" Width="80" HorizontalAlignment="Right"/>
+            <TextBox Margin="0,2" Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"/>
+        </DockPanel>
+
+        <ListView ItemsSource="{Binding Tweets}" DockPanel.Dock="Top">
+            <ListView.Resources>
+                <Style TargetType="GridViewColumnHeader">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Style>
+            </ListView.Resources>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding User.Image}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="80">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding User.Name}" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="360">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+
+        <StatusBar Height="20" DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+            <TextBlock Text="{Binding Status}"/>
+        </StatusBar>
+
+
+    </DockPanel>
+
+</Window>
